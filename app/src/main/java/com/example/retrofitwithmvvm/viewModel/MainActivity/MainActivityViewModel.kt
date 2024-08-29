@@ -9,7 +9,6 @@ import com.example.retrofitwithmvvm.Model.DataResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.util.concurrent.TimeoutException
@@ -19,8 +18,7 @@ import javax.inject.Inject
 class MainActivityViewModel @Inject constructor(private val repository: MainActivityRepository): ViewModel() {
 
 
-    var job: Job? = null
-    val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.printStackTrace()
     }
 
@@ -32,7 +30,7 @@ class MainActivityViewModel @Inject constructor(private val repository: MainActi
 
 
     fun getData(){
-        job = viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler)  {
+        viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler)  {
             try {
                 val response = repository.getData()
                 _successResponse.postValue(response)
@@ -52,10 +50,5 @@ class MainActivityViewModel @Inject constructor(private val repository: MainActi
                 _errorMessage.postValue(ResultError(-1, e.message.toString()))
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        job?.cancel()
     }
 }

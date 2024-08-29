@@ -3,8 +3,8 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.dagger.hilt.android")
-    id ("kotlin-kapt")
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
@@ -22,6 +22,16 @@ android {
 
     }
 
+    val properties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.inputStream())
+    }
+    val baseUrl: String = properties.getProperty("BASE_URL") ?: ""
+
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -29,6 +39,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+        }
+        debug {
+            buildConfigField("String","BASE_URL","\"$baseUrl\"")
         }
     }
     compileOptions {
@@ -60,8 +74,10 @@ dependencies {
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
     implementation (libs.logging.interceptor)
-    implementation ("com.google.dagger:hilt-android:2.48")
-    kapt ("com.google.dagger:hilt-compiler:2.48")
+
+    //Dagger hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
 
     //Coroutines
